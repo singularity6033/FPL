@@ -235,12 +235,12 @@ class CNN(nn.Module):
         }
         self.features = self.build_feature(model_name).to(DEVICE)
         self.classifier = nn.Sequential(
-            nn.Linear(512, 512),
+            nn.Linear(512, 512, bias=False),
             nn.ReLU(inplace=True),
-            nn.Dropout(),
-            nn.Linear(512, 512),
+            # nn.Dropout(),
+            nn.Linear(512, 512, bias=False),
             nn.ReLU(inplace=True),
-            nn.Dropout(),
+            # nn.Dropout(),
             nn.Linear(512, num_classes),
         )
         if init_weights:
@@ -254,7 +254,8 @@ class CNN(nn.Module):
                     nn.init.constant_(m.bias, 0)
             elif isinstance(m, nn.Linear):
                 nn.init.xavier_uniform_(m.weight)
-                nn.init.constant_(m.bias, 0)
+                if m.bias is not None:
+                    nn.init.constant_(m.bias, 0)
 
     def build_feature(self, model_name):
         layers = []

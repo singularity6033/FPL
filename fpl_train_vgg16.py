@@ -1,20 +1,25 @@
 import torch
+import torch.nn as nn
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 import torch.nn.functional as f
+import math as m
 import time
 from utils.fpl import FPL, DEVICE_
 import utils.my_module as mm
+import utils.my_functional as mf
+import numpy as np
+import scipy.io as sio
 import os
 
 BATCH_SIZE = 64
-dataset_name = 'cifar100'  # 'cifar100'
+dataset_name = 'cifar10'  # 'cifar100'
 model_save_path = './saved_models/vgg16_' + dataset_name + '_fpl'
 weights_save_path = './saved_weights/vgg16_' + dataset_name + '_fpl'
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
-N_CLASSES = 100
+N_CLASSES = 10
 
 mm.DEVICE = DEVICE
 DEVICE_[0] = DEVICE
@@ -22,20 +27,20 @@ t0 = time.time()
 no_epochs = 200
 
 # download and create datasets
-train_dataset = datasets.CIFAR100(root=dataset_name + '_data',
-                                  train=True,
-                                  transform=transforms.Compose([
-                                      transforms.RandomHorizontalFlip(),
-                                      transforms.RandomCrop(32, 4),
-                                      transforms.ToTensor(),
-                                  ]),
-                                  download=True)
+train_dataset = datasets.CIFAR10(root=dataset_name + '_data',
+                                 train=True,
+                                 transform=transforms.Compose([
+                                     transforms.RandomHorizontalFlip(),
+                                     transforms.RandomCrop(32, 4),
+                                     transforms.ToTensor(),
+                                 ]),
+                                 download=True)
 
-valid_dataset = datasets.CIFAR100(root=dataset_name + '_data',
-                                  train=False,
-                                  transform=transforms.Compose([
-                                      transforms.ToTensor(),
-                                  ]))
+valid_dataset = datasets.CIFAR10(root=dataset_name + '_data',
+                                 train=False,
+                                 transform=transforms.Compose([
+                                     transforms.ToTensor(),
+                                 ]))
 
 # define the data loaders
 train_loader = DataLoader(dataset=train_dataset,
@@ -74,8 +79,8 @@ weights_1 = model.get_weights()
 acc_lst, loss_lst = model.evaluate_both(train_loader, val_loader)
 print('accuracy: ', acc_lst)
 print('loss: ', loss_lst)
-torch.save(weights_1[0], os.path.join(weights_save_path, dataset_name+'_vgg16_w1_0.pt'))
-torch.save(weights_1[2], os.path.join(weights_save_path, dataset_name+'_vgg16_w1_2.pt'))
+torch.save(weights_1[0], os.path.join(weights_save_path, dataset_name + '_vgg16_w1_0.pt'))
+torch.save(weights_1[2], os.path.join(weights_save_path, dataset_name + '_vgg16_w1_2.pt'))
 
 print('+++++++++++++++++++++++ Model 2 +++++++++++++++++++++++++')
 t0 = time.time()
@@ -108,9 +113,9 @@ print('accuracy: ', acc_lst)
 print('loss: ', loss_lst)
 
 weights_2 = model.get_weights()
-torch.save(weights_2[0], os.path.join(weights_save_path, dataset_name+'_vgg16_w2_0.pt'))
-torch.save(weights_2[1], os.path.join(weights_save_path, dataset_name+'_vgg16_w2_1.pt'))
-torch.save(weights_2[4], os.path.join(weights_save_path, dataset_name+'_vgg16_w2_4.pt'))
+torch.save(weights_2[0], os.path.join(weights_save_path, dataset_name + '_vgg16_w2_0.pt'))
+torch.save(weights_2[1], os.path.join(weights_save_path, dataset_name + '_vgg16_w2_1.pt'))
+torch.save(weights_2[4], os.path.join(weights_save_path, dataset_name + '_vgg16_w2_4.pt'))
 
 print('+++++++++++++++++++++++ Model 3 +++++++++++++++++++++++++')
 t0 = time.time()
@@ -145,10 +150,10 @@ print('accuracy: ', acc_lst)
 print('loss: ', loss_lst)
 
 weights_3 = model.get_weights()
-torch.save(weights_3[0], os.path.join(weights_save_path, dataset_name+'_vgg16_w3_0.pt'))
-torch.save(weights_3[1], os.path.join(weights_save_path, dataset_name+'_vgg16_w3_1.pt'))
-torch.save(weights_3[3], os.path.join(weights_save_path, dataset_name+'_vgg16_w3_3.pt'))
-torch.save(weights_3[5], os.path.join(weights_save_path, dataset_name+'_vgg16_w3_5.pt'))
+torch.save(weights_3[0], os.path.join(weights_save_path, dataset_name + '_vgg16_w3_0.pt'))
+torch.save(weights_3[1], os.path.join(weights_save_path, dataset_name + '_vgg16_w3_1.pt'))
+torch.save(weights_3[3], os.path.join(weights_save_path, dataset_name + '_vgg16_w3_3.pt'))
+torch.save(weights_3[5], os.path.join(weights_save_path, dataset_name + '_vgg16_w3_5.pt'))
 
 print('+++++++++++++++++++++++ Model 4 +++++++++++++++++++++++++')
 t0 = time.time()
@@ -186,11 +191,11 @@ print('accuracy: ', acc_lst)
 print('loss: ', loss_lst)
 
 weights_4 = model.get_weights()
-torch.save(weights_4[0], os.path.join(weights_save_path, dataset_name+'_vgg16_w4_0.pt'))
-torch.save(weights_4[1], os.path.join(weights_save_path, dataset_name+'_vgg16_w4_1.pt'))
-torch.save(weights_4[3], os.path.join(weights_save_path, dataset_name+'_vgg16_w4_3.pt'))
-torch.save(weights_4[4], os.path.join(weights_save_path, dataset_name+'_vgg16_w4_4.pt'))
-torch.save(weights_4[7], os.path.join(weights_save_path, dataset_name+'_vgg16_w4_7.pt'))
+torch.save(weights_4[0], os.path.join(weights_save_path, dataset_name + '_vgg16_w4_0.pt'))
+torch.save(weights_4[1], os.path.join(weights_save_path, dataset_name + '_vgg16_w4_1.pt'))
+torch.save(weights_4[3], os.path.join(weights_save_path, dataset_name + '_vgg16_w4_3.pt'))
+torch.save(weights_4[4], os.path.join(weights_save_path, dataset_name + '_vgg16_w4_4.pt'))
+torch.save(weights_4[7], os.path.join(weights_save_path, dataset_name + '_vgg16_w4_7.pt'))
 
 print('+++++++++++++++++++++++ Model 5 +++++++++++++++++++++++++')
 t0 = time.time()
@@ -230,12 +235,12 @@ print('accuracy: ', acc_lst)
 print('loss: ', loss_lst)
 
 weights_5 = model.get_weights()
-torch.save(weights_5[0], os.path.join(weights_save_path, dataset_name+'_vgg16_w5_0.pt'))
-torch.save(weights_5[1], os.path.join(weights_save_path, dataset_name+'_vgg16_w5_1.pt'))
-torch.save(weights_5[3], os.path.join(weights_save_path, dataset_name+'_vgg16_w5_3.pt'))
-torch.save(weights_5[4], os.path.join(weights_save_path, dataset_name+'_vgg16_w5_4.pt'))
-torch.save(weights_5[6], os.path.join(weights_save_path, dataset_name+'_vgg16_w5_6.pt'))
-torch.save(weights_5[8], os.path.join(weights_save_path, dataset_name+'_vgg16_w5_8.pt'))
+torch.save(weights_5[0], os.path.join(weights_save_path, dataset_name + '_vgg16_w5_0.pt'))
+torch.save(weights_5[1], os.path.join(weights_save_path, dataset_name + '_vgg16_w5_1.pt'))
+torch.save(weights_5[3], os.path.join(weights_save_path, dataset_name + '_vgg16_w5_3.pt'))
+torch.save(weights_5[4], os.path.join(weights_save_path, dataset_name + '_vgg16_w5_4.pt'))
+torch.save(weights_5[6], os.path.join(weights_save_path, dataset_name + '_vgg16_w5_6.pt'))
+torch.save(weights_5[8], os.path.join(weights_save_path, dataset_name + '_vgg16_w5_8.pt'))
 
 print('+++++++++++++++++++++++ Model 6 +++++++++++++++++++++++++')
 t0 = time.time()
@@ -277,13 +282,13 @@ print('accuracy: ', acc_lst)
 print('loss: ', loss_lst)
 
 weights_6 = model.get_weights()
-torch.save(weights_6[0], os.path.join(weights_save_path, dataset_name+'_vgg16_w6_0.pt'))
-torch.save(weights_6[1], os.path.join(weights_save_path, dataset_name+'_vgg16_w6_1.pt'))
-torch.save(weights_6[3], os.path.join(weights_save_path, dataset_name+'_vgg16_w6_3.pt'))
-torch.save(weights_6[4], os.path.join(weights_save_path, dataset_name+'_vgg16_w6_4.pt'))
-torch.save(weights_6[6], os.path.join(weights_save_path, dataset_name+'_vgg16_w6_6.pt'))
-torch.save(weights_6[7], os.path.join(weights_save_path, dataset_name+'_vgg16_w6_7.pt'))
-torch.save(weights_6[9], os.path.join(weights_save_path, dataset_name+'_vgg16_w6_9.pt'))
+torch.save(weights_6[0], os.path.join(weights_save_path, dataset_name + '_vgg16_w6_0.pt'))
+torch.save(weights_6[1], os.path.join(weights_save_path, dataset_name + '_vgg16_w6_1.pt'))
+torch.save(weights_6[3], os.path.join(weights_save_path, dataset_name + '_vgg16_w6_3.pt'))
+torch.save(weights_6[4], os.path.join(weights_save_path, dataset_name + '_vgg16_w6_4.pt'))
+torch.save(weights_6[6], os.path.join(weights_save_path, dataset_name + '_vgg16_w6_6.pt'))
+torch.save(weights_6[7], os.path.join(weights_save_path, dataset_name + '_vgg16_w6_7.pt'))
+torch.save(weights_6[9], os.path.join(weights_save_path, dataset_name + '_vgg16_w6_9.pt'))
 
 print('+++++++++++++++++++++++ Model 7 +++++++++++++++++++++++++')
 t0 = time.time()
@@ -328,14 +333,14 @@ print('accuracy: ', acc_lst)
 print('loss: ', loss_lst)
 
 weights_7 = model.get_weights()
-torch.save(weights_7[0], os.path.join(weights_save_path, dataset_name+'_vgg16_w7_0.pt'))
-torch.save(weights_7[1], os.path.join(weights_save_path, dataset_name+'_vgg16_w7_1.pt'))
-torch.save(weights_7[3], os.path.join(weights_save_path, dataset_name+'_vgg16_w7_3.pt'))
-torch.save(weights_7[4], os.path.join(weights_save_path, dataset_name+'_vgg16_w7_4.pt'))
-torch.save(weights_7[6], os.path.join(weights_save_path, dataset_name+'_vgg16_w7_6.pt'))
-torch.save(weights_7[7], os.path.join(weights_save_path, dataset_name+'_vgg16_w7_7.pt'))
-torch.save(weights_7[8], os.path.join(weights_save_path, dataset_name+'_vgg16_w7_8.pt'))
-torch.save(weights_7[11], os.path.join(weights_save_path, dataset_name+'_vgg16_w7_11.pt'))
+torch.save(weights_7[0], os.path.join(weights_save_path, dataset_name + '_vgg16_w7_0.pt'))
+torch.save(weights_7[1], os.path.join(weights_save_path, dataset_name + '_vgg16_w7_1.pt'))
+torch.save(weights_7[3], os.path.join(weights_save_path, dataset_name + '_vgg16_w7_3.pt'))
+torch.save(weights_7[4], os.path.join(weights_save_path, dataset_name + '_vgg16_w7_4.pt'))
+torch.save(weights_7[6], os.path.join(weights_save_path, dataset_name + '_vgg16_w7_6.pt'))
+torch.save(weights_7[7], os.path.join(weights_save_path, dataset_name + '_vgg16_w7_7.pt'))
+torch.save(weights_7[8], os.path.join(weights_save_path, dataset_name + '_vgg16_w7_8.pt'))
+torch.save(weights_7[11], os.path.join(weights_save_path, dataset_name + '_vgg16_w7_11.pt'))
 
 print('+++++++++++++++++++++++ Model 8 +++++++++++++++++++++++++')
 t0 = time.time()
@@ -382,15 +387,15 @@ print('accuracy: ', acc_lst)
 print('loss: ', loss_lst)
 
 weights_8 = model.get_weights()
-torch.save(weights_8[0], os.path.join(weights_save_path, dataset_name+'_vgg16_w8_0.pt'))
-torch.save(weights_8[1], os.path.join(weights_save_path, dataset_name+'_vgg16_w8_1.pt'))
-torch.save(weights_8[3], os.path.join(weights_save_path, dataset_name+'_vgg16_w8_3.pt'))
-torch.save(weights_8[4], os.path.join(weights_save_path, dataset_name+'_vgg16_w8_4.pt'))
-torch.save(weights_8[6], os.path.join(weights_save_path, dataset_name+'_vgg16_w8_6.pt'))
-torch.save(weights_8[7], os.path.join(weights_save_path, dataset_name+'_vgg16_w8_7.pt'))
-torch.save(weights_8[8], os.path.join(weights_save_path, dataset_name+'_vgg16_w8_8.pt'))
-torch.save(weights_8[10], os.path.join(weights_save_path, dataset_name+'_vgg16_w8_10.pt'))
-torch.save(weights_8[12], os.path.join(weights_save_path, dataset_name+'_vgg16_w8_12.pt'))
+torch.save(weights_8[0], os.path.join(weights_save_path, dataset_name + '_vgg16_w8_0.pt'))
+torch.save(weights_8[1], os.path.join(weights_save_path, dataset_name + '_vgg16_w8_1.pt'))
+torch.save(weights_8[3], os.path.join(weights_save_path, dataset_name + '_vgg16_w8_3.pt'))
+torch.save(weights_8[4], os.path.join(weights_save_path, dataset_name + '_vgg16_w8_4.pt'))
+torch.save(weights_8[6], os.path.join(weights_save_path, dataset_name + '_vgg16_w8_6.pt'))
+torch.save(weights_8[7], os.path.join(weights_save_path, dataset_name + '_vgg16_w8_7.pt'))
+torch.save(weights_8[8], os.path.join(weights_save_path, dataset_name + '_vgg16_w8_8.pt'))
+torch.save(weights_8[10], os.path.join(weights_save_path, dataset_name + '_vgg16_w8_10.pt'))
+torch.save(weights_8[12], os.path.join(weights_save_path, dataset_name + '_vgg16_w8_12.pt'))
 
 print('+++++++++++++++++++++++ Model 9 +++++++++++++++++++++++++')
 t0 = time.time()
@@ -439,16 +444,16 @@ print('accuracy: ', acc_lst)
 print('loss: ', loss_lst)
 
 weights_9 = model.get_weights()
-torch.save(weights_9[0], os.path.join(weights_save_path, dataset_name+'_vgg16_w9_0.pt'))
-torch.save(weights_9[1], os.path.join(weights_save_path, dataset_name+'_vgg16_w9_1.pt'))
-torch.save(weights_9[3], os.path.join(weights_save_path, dataset_name+'_vgg16_w9_3.pt'))
-torch.save(weights_9[4], os.path.join(weights_save_path, dataset_name+'_vgg16_w9_4.pt'))
-torch.save(weights_9[6], os.path.join(weights_save_path, dataset_name+'_vgg16_w9_6.pt'))
-torch.save(weights_9[7], os.path.join(weights_save_path, dataset_name+'_vgg16_w9_7.pt'))
-torch.save(weights_9[8], os.path.join(weights_save_path, dataset_name+'_vgg16_w9_8.pt'))
-torch.save(weights_9[10], os.path.join(weights_save_path, dataset_name+'_vgg16_w9_10.pt'))
-torch.save(weights_9[11], os.path.join(weights_save_path, dataset_name+'_vgg16_w9_11.pt'))
-torch.save(weights_9[13], os.path.join(weights_save_path, dataset_name+'_vgg16_w9_13.pt'))
+torch.save(weights_9[0], os.path.join(weights_save_path, dataset_name + '_vgg16_w9_0.pt'))
+torch.save(weights_9[1], os.path.join(weights_save_path, dataset_name + '_vgg16_w9_1.pt'))
+torch.save(weights_9[3], os.path.join(weights_save_path, dataset_name + '_vgg16_w9_3.pt'))
+torch.save(weights_9[4], os.path.join(weights_save_path, dataset_name + '_vgg16_w9_4.pt'))
+torch.save(weights_9[6], os.path.join(weights_save_path, dataset_name + '_vgg16_w9_6.pt'))
+torch.save(weights_9[7], os.path.join(weights_save_path, dataset_name + '_vgg16_w9_7.pt'))
+torch.save(weights_9[8], os.path.join(weights_save_path, dataset_name + '_vgg16_w9_8.pt'))
+torch.save(weights_9[10], os.path.join(weights_save_path, dataset_name + '_vgg16_w9_10.pt'))
+torch.save(weights_9[11], os.path.join(weights_save_path, dataset_name + '_vgg16_w9_11.pt'))
+torch.save(weights_9[13], os.path.join(weights_save_path, dataset_name + '_vgg16_w9_13.pt'))
 
 print('+++++++++++++++++++++++ Model 10 +++++++++++++++++++++++++')
 t0 = time.time()
@@ -500,17 +505,17 @@ print('accuracy: ', acc_lst)
 print('loss: ', loss_lst)
 
 weights_10 = model.get_weights()
-torch.save(weights_10[0], os.path.join(weights_save_path, dataset_name+'_vgg16_w10_0.pt'))
-torch.save(weights_10[1], os.path.join(weights_save_path, dataset_name+'_vgg16_w10_1.pt'))
-torch.save(weights_10[3], os.path.join(weights_save_path, dataset_name+'_vgg16_w10_3.pt'))
-torch.save(weights_10[4], os.path.join(weights_save_path, dataset_name+'_vgg16_w10_4.pt'))
-torch.save(weights_10[6], os.path.join(weights_save_path, dataset_name+'_vgg16_w10_6.pt'))
-torch.save(weights_10[7], os.path.join(weights_save_path, dataset_name+'_vgg16_w10_7.pt'))
-torch.save(weights_10[8], os.path.join(weights_save_path, dataset_name+'_vgg16_w10_8.pt'))
-torch.save(weights_10[10], os.path.join(weights_save_path, dataset_name+'_vgg16_w10_10.pt'))
-torch.save(weights_10[11], os.path.join(weights_save_path, dataset_name+'_vgg16_w10_11.pt'))
-torch.save(weights_10[12], os.path.join(weights_save_path, dataset_name+'_vgg16_w10_12.pt'))
-torch.save(weights_10[15], os.path.join(weights_save_path, dataset_name+'_vgg16_w10_15.pt'))
+torch.save(weights_10[0], os.path.join(weights_save_path, dataset_name + '_vgg16_w10_0.pt'))
+torch.save(weights_10[1], os.path.join(weights_save_path, dataset_name + '_vgg16_w10_1.pt'))
+torch.save(weights_10[3], os.path.join(weights_save_path, dataset_name + '_vgg16_w10_3.pt'))
+torch.save(weights_10[4], os.path.join(weights_save_path, dataset_name + '_vgg16_w10_4.pt'))
+torch.save(weights_10[6], os.path.join(weights_save_path, dataset_name + '_vgg16_w10_6.pt'))
+torch.save(weights_10[7], os.path.join(weights_save_path, dataset_name + '_vgg16_w10_7.pt'))
+torch.save(weights_10[8], os.path.join(weights_save_path, dataset_name + '_vgg16_w10_8.pt'))
+torch.save(weights_10[10], os.path.join(weights_save_path, dataset_name + '_vgg16_w10_10.pt'))
+torch.save(weights_10[11], os.path.join(weights_save_path, dataset_name + '_vgg16_w10_11.pt'))
+torch.save(weights_10[12], os.path.join(weights_save_path, dataset_name + '_vgg16_w10_12.pt'))
+torch.save(weights_10[15], os.path.join(weights_save_path, dataset_name + '_vgg16_w10_15.pt'))
 
 print('+++++++++++++++++++++++ Model 11 +++++++++++++++++++++++++')
 t0 = time.time()
@@ -564,18 +569,18 @@ print('accuracy: ', acc_lst)
 print('loss: ', loss_lst)
 
 weights_11 = model.get_weights()
-torch.save(weights_11[0], os.path.join(weights_save_path, dataset_name+'_vgg16_w11_0.pt'))
-torch.save(weights_11[1], os.path.join(weights_save_path, dataset_name+'_vgg16_w11_1.pt'))
-torch.save(weights_11[3], os.path.join(weights_save_path, dataset_name+'_vgg16_w11_3.pt'))
-torch.save(weights_11[4], os.path.join(weights_save_path, dataset_name+'_vgg16_w11_4.pt'))
-torch.save(weights_11[6], os.path.join(weights_save_path, dataset_name+'_vgg16_w11_6.pt'))
-torch.save(weights_11[7], os.path.join(weights_save_path, dataset_name+'_vgg16_w11_7.pt'))
-torch.save(weights_11[8], os.path.join(weights_save_path, dataset_name+'_vgg16_w11_8.pt'))
-torch.save(weights_11[10], os.path.join(weights_save_path, dataset_name+'_vgg16_w11_10.pt'))
-torch.save(weights_11[11], os.path.join(weights_save_path, dataset_name+'_vgg16_w11_11.pt'))
-torch.save(weights_11[12], os.path.join(weights_save_path, dataset_name+'_vgg16_w11_12.pt'))
-torch.save(weights_11[14], os.path.join(weights_save_path, dataset_name+'_vgg16_w11_14.pt'))
-torch.save(weights_11[16], os.path.join(weights_save_path, dataset_name+'_vgg16_w11_16.pt'))
+torch.save(weights_11[0], os.path.join(weights_save_path, dataset_name + '_vgg16_w11_0.pt'))
+torch.save(weights_11[1], os.path.join(weights_save_path, dataset_name + '_vgg16_w11_1.pt'))
+torch.save(weights_11[3], os.path.join(weights_save_path, dataset_name + '_vgg16_w11_3.pt'))
+torch.save(weights_11[4], os.path.join(weights_save_path, dataset_name + '_vgg16_w11_4.pt'))
+torch.save(weights_11[6], os.path.join(weights_save_path, dataset_name + '_vgg16_w11_6.pt'))
+torch.save(weights_11[7], os.path.join(weights_save_path, dataset_name + '_vgg16_w11_7.pt'))
+torch.save(weights_11[8], os.path.join(weights_save_path, dataset_name + '_vgg16_w11_8.pt'))
+torch.save(weights_11[10], os.path.join(weights_save_path, dataset_name + '_vgg16_w11_10.pt'))
+torch.save(weights_11[11], os.path.join(weights_save_path, dataset_name + '_vgg16_w11_11.pt'))
+torch.save(weights_11[12], os.path.join(weights_save_path, dataset_name + '_vgg16_w11_12.pt'))
+torch.save(weights_11[14], os.path.join(weights_save_path, dataset_name + '_vgg16_w11_14.pt'))
+torch.save(weights_11[16], os.path.join(weights_save_path, dataset_name + '_vgg16_w11_16.pt'))
 
 print('+++++++++++++++++++++++ Model 12 +++++++++++++++++++++++++')
 t0 = time.time()
@@ -631,19 +636,19 @@ print('accuracy: ', acc_lst)
 print('loss: ', loss_lst)
 
 weights_12 = model.get_weights()
-torch.save(weights_12[0], os.path.join(weights_save_path, dataset_name+'_vgg16_w12_0.pt'))
-torch.save(weights_12[1], os.path.join(weights_save_path, dataset_name+'_vgg16_w12_1.pt'))
-torch.save(weights_12[3], os.path.join(weights_save_path, dataset_name+'_vgg16_w12_3.pt'))
-torch.save(weights_12[4], os.path.join(weights_save_path, dataset_name+'_vgg16_w12_4.pt'))
-torch.save(weights_12[6], os.path.join(weights_save_path, dataset_name+'_vgg16_w12_6.pt'))
-torch.save(weights_12[7], os.path.join(weights_save_path, dataset_name+'_vgg16_w12_7.pt'))
-torch.save(weights_12[8], os.path.join(weights_save_path, dataset_name+'_vgg16_w12_8.pt'))
-torch.save(weights_12[10], os.path.join(weights_save_path, dataset_name+'_vgg16_w12_10.pt'))
-torch.save(weights_12[11], os.path.join(weights_save_path, dataset_name+'_vgg16_w12_11.pt'))
-torch.save(weights_12[12], os.path.join(weights_save_path, dataset_name+'_vgg16_w12_12.pt'))
-torch.save(weights_12[14], os.path.join(weights_save_path, dataset_name+'_vgg16_w12_14.pt'))
-torch.save(weights_12[15], os.path.join(weights_save_path, dataset_name+'_vgg16_w12_15.pt'))
-torch.save(weights_12[17], os.path.join(weights_save_path, dataset_name+'_vgg16_w12_17.pt'))
+torch.save(weights_12[0], os.path.join(weights_save_path, dataset_name + '_vgg16_w12_0.pt'))
+torch.save(weights_12[1], os.path.join(weights_save_path, dataset_name + '_vgg16_w12_1.pt'))
+torch.save(weights_12[3], os.path.join(weights_save_path, dataset_name + '_vgg16_w12_3.pt'))
+torch.save(weights_12[4], os.path.join(weights_save_path, dataset_name + '_vgg16_w12_4.pt'))
+torch.save(weights_12[6], os.path.join(weights_save_path, dataset_name + '_vgg16_w12_6.pt'))
+torch.save(weights_12[7], os.path.join(weights_save_path, dataset_name + '_vgg16_w12_7.pt'))
+torch.save(weights_12[8], os.path.join(weights_save_path, dataset_name + '_vgg16_w12_8.pt'))
+torch.save(weights_12[10], os.path.join(weights_save_path, dataset_name + '_vgg16_w12_10.pt'))
+torch.save(weights_12[11], os.path.join(weights_save_path, dataset_name + '_vgg16_w12_11.pt'))
+torch.save(weights_12[12], os.path.join(weights_save_path, dataset_name + '_vgg16_w12_12.pt'))
+torch.save(weights_12[14], os.path.join(weights_save_path, dataset_name + '_vgg16_w12_14.pt'))
+torch.save(weights_12[15], os.path.join(weights_save_path, dataset_name + '_vgg16_w12_15.pt'))
+torch.save(weights_12[17], os.path.join(weights_save_path, dataset_name + '_vgg16_w12_17.pt'))
 
 print('+++++++++++++++++++++++ Model 13 +++++++++++++++++++++++++')
 t0 = time.time()
@@ -702,20 +707,20 @@ print('accuracy: ', acc_lst)
 print('loss: ', loss_lst)
 
 weights_13 = model.get_weights()
-torch.save(weights_13[0], os.path.join(weights_save_path, dataset_name+'_vgg16_w13_0.pt'))
-torch.save(weights_13[1], os.path.join(weights_save_path, dataset_name+'_vgg16_w13_1.pt'))
-torch.save(weights_13[3], os.path.join(weights_save_path, dataset_name+'_vgg16_w13_3.pt'))
-torch.save(weights_13[4], os.path.join(weights_save_path, dataset_name+'_vgg16_w13_4.pt'))
-torch.save(weights_13[6], os.path.join(weights_save_path, dataset_name+'_vgg16_w13_6.pt'))
-torch.save(weights_13[7], os.path.join(weights_save_path, dataset_name+'_vgg16_w13_7.pt'))
-torch.save(weights_13[8], os.path.join(weights_save_path, dataset_name+'_vgg16_w13_8.pt'))
-torch.save(weights_13[10], os.path.join(weights_save_path, dataset_name+'_vgg16_w13_10.pt'))
-torch.save(weights_13[11], os.path.join(weights_save_path, dataset_name+'_vgg16_w13_11.pt'))
-torch.save(weights_13[12], os.path.join(weights_save_path, dataset_name+'_vgg16_w13_12.pt'))
-torch.save(weights_13[14], os.path.join(weights_save_path, dataset_name+'_vgg16_w13_14.pt'))
-torch.save(weights_13[15], os.path.join(weights_save_path, dataset_name+'_vgg16_w13_15.pt'))
-torch.save(weights_13[16], os.path.join(weights_save_path, dataset_name+'_vgg16_w13_16.pt'))
-torch.save(weights_13[19], os.path.join(weights_save_path, dataset_name+'_vgg16_w13_19.pt'))
+torch.save(weights_13[0], os.path.join(weights_save_path, dataset_name + '_vgg16_w13_0.pt'))
+torch.save(weights_13[1], os.path.join(weights_save_path, dataset_name + '_vgg16_w13_1.pt'))
+torch.save(weights_13[3], os.path.join(weights_save_path, dataset_name + '_vgg16_w13_3.pt'))
+torch.save(weights_13[4], os.path.join(weights_save_path, dataset_name + '_vgg16_w13_4.pt'))
+torch.save(weights_13[6], os.path.join(weights_save_path, dataset_name + '_vgg16_w13_6.pt'))
+torch.save(weights_13[7], os.path.join(weights_save_path, dataset_name + '_vgg16_w13_7.pt'))
+torch.save(weights_13[8], os.path.join(weights_save_path, dataset_name + '_vgg16_w13_8.pt'))
+torch.save(weights_13[10], os.path.join(weights_save_path, dataset_name + '_vgg16_w13_10.pt'))
+torch.save(weights_13[11], os.path.join(weights_save_path, dataset_name + '_vgg16_w13_11.pt'))
+torch.save(weights_13[12], os.path.join(weights_save_path, dataset_name + '_vgg16_w13_12.pt'))
+torch.save(weights_13[14], os.path.join(weights_save_path, dataset_name + '_vgg16_w13_14.pt'))
+torch.save(weights_13[15], os.path.join(weights_save_path, dataset_name + '_vgg16_w13_15.pt'))
+torch.save(weights_13[16], os.path.join(weights_save_path, dataset_name + '_vgg16_w13_16.pt'))
+torch.save(weights_13[19], os.path.join(weights_save_path, dataset_name + '_vgg16_w13_19.pt'))
 
 # add fc layers
 print('+++++++++++++++++++++++ Model 14 +++++++++++++++++++++++++')
@@ -777,21 +782,21 @@ print('accuracy: ', acc_lst)
 print('loss: ', loss_lst)
 
 weights_14 = model.get_weights()
-torch.save(weights_14[0], os.path.join(weights_save_path, dataset_name+'_vgg16_w14_0.pt'))
-torch.save(weights_14[1], os.path.join(weights_save_path, dataset_name+'_vgg16_w14_1.pt'))
-torch.save(weights_14[3], os.path.join(weights_save_path, dataset_name+'_vgg16_w14_3.pt'))
-torch.save(weights_14[4], os.path.join(weights_save_path, dataset_name+'_vgg16_w14_4.pt'))
-torch.save(weights_14[6], os.path.join(weights_save_path, dataset_name+'_vgg16_w14_6.pt'))
-torch.save(weights_14[7], os.path.join(weights_save_path, dataset_name+'_vgg16_w14_7.pt'))
-torch.save(weights_14[8], os.path.join(weights_save_path, dataset_name+'_vgg16_w14_8.pt'))
-torch.save(weights_14[10], os.path.join(weights_save_path, dataset_name+'_vgg16_w14_10.pt'))
-torch.save(weights_14[11], os.path.join(weights_save_path, dataset_name+'_vgg16_w14_11.pt'))
-torch.save(weights_14[12], os.path.join(weights_save_path, dataset_name+'_vgg16_w14_12.pt'))
-torch.save(weights_14[14], os.path.join(weights_save_path, dataset_name+'_vgg16_w14_14.pt'))
-torch.save(weights_14[15], os.path.join(weights_save_path, dataset_name+'_vgg16_w14_15.pt'))
-torch.save(weights_14[16], os.path.join(weights_save_path, dataset_name+'_vgg16_w14_16.pt'))
-torch.save(weights_14[19], os.path.join(weights_save_path, dataset_name+'_vgg16_w14_19.pt'))
-torch.save(weights_14[20], os.path.join(weights_save_path, dataset_name+'_vgg16_w14_20.pt'))
+torch.save(weights_14[0], os.path.join(weights_save_path, dataset_name + '_vgg16_w14_0.pt'))
+torch.save(weights_14[1], os.path.join(weights_save_path, dataset_name + '_vgg16_w14_1.pt'))
+torch.save(weights_14[3], os.path.join(weights_save_path, dataset_name + '_vgg16_w14_3.pt'))
+torch.save(weights_14[4], os.path.join(weights_save_path, dataset_name + '_vgg16_w14_4.pt'))
+torch.save(weights_14[6], os.path.join(weights_save_path, dataset_name + '_vgg16_w14_6.pt'))
+torch.save(weights_14[7], os.path.join(weights_save_path, dataset_name + '_vgg16_w14_7.pt'))
+torch.save(weights_14[8], os.path.join(weights_save_path, dataset_name + '_vgg16_w14_8.pt'))
+torch.save(weights_14[10], os.path.join(weights_save_path, dataset_name + '_vgg16_w14_10.pt'))
+torch.save(weights_14[11], os.path.join(weights_save_path, dataset_name + '_vgg16_w14_11.pt'))
+torch.save(weights_14[12], os.path.join(weights_save_path, dataset_name + '_vgg16_w14_12.pt'))
+torch.save(weights_14[14], os.path.join(weights_save_path, dataset_name + '_vgg16_w14_14.pt'))
+torch.save(weights_14[15], os.path.join(weights_save_path, dataset_name + '_vgg16_w14_15.pt'))
+torch.save(weights_14[16], os.path.join(weights_save_path, dataset_name + '_vgg16_w14_16.pt'))
+torch.save(weights_14[19], os.path.join(weights_save_path, dataset_name + '_vgg16_w14_19.pt'))
+torch.save(weights_14[20], os.path.join(weights_save_path, dataset_name + '_vgg16_w14_20.pt'))
 
 print('+++++++++++++++++++++++ Model 15 +++++++++++++++++++++++++')
 t0 = time.time()
@@ -854,19 +859,19 @@ print('accuracy: ', acc_lst)
 print('loss: ', loss_lst)
 
 weights_15 = model.get_weights()
-torch.save(weights_15[0], os.path.join(weights_save_path, dataset_name+'_vgg16_w15_0.pt'))
-torch.save(weights_15[1], os.path.join(weights_save_path, dataset_name+'_vgg16_w15_1.pt'))
-torch.save(weights_15[3], os.path.join(weights_save_path, dataset_name+'_vgg16_w15_3.pt'))
-torch.save(weights_15[4], os.path.join(weights_save_path, dataset_name+'_vgg16_w15_4.pt'))
-torch.save(weights_15[6], os.path.join(weights_save_path, dataset_name+'_vgg16_w15_6.pt'))
-torch.save(weights_15[7], os.path.join(weights_save_path, dataset_name+'_vgg16_w15_7.pt'))
-torch.save(weights_15[8], os.path.join(weights_save_path, dataset_name+'_vgg16_w15_8.pt'))
-torch.save(weights_15[10], os.path.join(weights_save_path, dataset_name+'_vgg16_w15_10.pt'))
-torch.save(weights_15[11], os.path.join(weights_save_path, dataset_name+'_vgg16_w15_11.pt'))
-torch.save(weights_15[12], os.path.join(weights_save_path, dataset_name+'_vgg16_w15_12.pt'))
-torch.save(weights_15[14], os.path.join(weights_save_path, dataset_name+'_vgg16_w15_14.pt'))
-torch.save(weights_15[15], os.path.join(weights_save_path, dataset_name+'_vgg16_w15_15.pt'))
-torch.save(weights_15[16], os.path.join(weights_save_path, dataset_name+'_vgg16_w15_16.pt'))
-torch.save(weights_15[19], os.path.join(weights_save_path, dataset_name+'_vgg16_w15_19.pt'))
-torch.save(weights_15[20], os.path.join(weights_save_path, dataset_name+'_vgg16_w15_20.pt'))
-torch.save(weights_15[21], os.path.join(weights_save_path, dataset_name+'_vgg16_w15_21.pt'))
+torch.save(weights_15[0], os.path.join(weights_save_path, dataset_name + '_vgg16_w15_0.pt'))
+torch.save(weights_15[1], os.path.join(weights_save_path, dataset_name + '_vgg16_w15_1.pt'))
+torch.save(weights_15[3], os.path.join(weights_save_path, dataset_name + '_vgg16_w15_3.pt'))
+torch.save(weights_15[4], os.path.join(weights_save_path, dataset_name + '_vgg16_w15_4.pt'))
+torch.save(weights_15[6], os.path.join(weights_save_path, dataset_name + '_vgg16_w15_6.pt'))
+torch.save(weights_15[7], os.path.join(weights_save_path, dataset_name + '_vgg16_w15_7.pt'))
+torch.save(weights_15[8], os.path.join(weights_save_path, dataset_name + '_vgg16_w15_8.pt'))
+torch.save(weights_15[10], os.path.join(weights_save_path, dataset_name + '_vgg16_w15_10.pt'))
+torch.save(weights_15[11], os.path.join(weights_save_path, dataset_name + '_vgg16_w15_11.pt'))
+torch.save(weights_15[12], os.path.join(weights_save_path, dataset_name + '_vgg16_w15_12.pt'))
+torch.save(weights_15[14], os.path.join(weights_save_path, dataset_name + '_vgg16_w15_14.pt'))
+torch.save(weights_15[15], os.path.join(weights_save_path, dataset_name + '_vgg16_w15_15.pt'))
+torch.save(weights_15[16], os.path.join(weights_save_path, dataset_name + '_vgg16_w15_16.pt'))
+torch.save(weights_15[19], os.path.join(weights_save_path, dataset_name + '_vgg16_w15_19.pt'))
+torch.save(weights_15[20], os.path.join(weights_save_path, dataset_name + '_vgg16_w15_20.pt'))
+torch.save(weights_15[21], os.path.join(weights_save_path, dataset_name + '_vgg16_w15_21.pt'))

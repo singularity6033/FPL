@@ -1,21 +1,21 @@
 import torch
+import torch.nn as nn
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 import torch.nn.functional as f
+import math as m
 import time
 from utils.fpl import FPL, DEVICE_
 import utils.my_module as mm
+import utils.my_functional as mf
+import numpy as np
+import scipy.io as sio
 import os
 
 BATCH_SIZE = 64
 dataset_name = 'cifar100'  # 'cifar100'
 model_save_path = './saved_models/vgg16_' + dataset_name + '_fpl'
 weights_save_path = './saved_weights/vgg11_' + dataset_name + '_fpl'
-
-if not os.path.exists(model_save_path):
-    os.makedirs(model_save_path)
-if not os.path.exists(weights_save_path):
-    os.makedirs(weights_save_path)
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
