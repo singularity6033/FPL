@@ -24,10 +24,10 @@ weight_decay = 1e-6
 momentum = 0.9
 lr_drop = 20
 model_name = 'vgg11'  # vgg11 or vgg16
-dataset_name = 'cifar10'  # cifar10 or cifar100
-weights_saved_path = './saved_weights/' + model_name + '_' + dataset_name + '_sgd_ndn'
-best_weights_saved_path = './saved_weights/' + model_name + '_' + dataset_name + '_sgd_ndn_best'
-param_saved_path = './saved_models/' + model_name + '_' + dataset_name + '_sgd_ndn'
+dataset_name = 'cifar100'  # cifar10 or cifar100
+weights_saved_path = './saved_weights/' + model_name + '_' + dataset_name + '_sgd_ndn_new'
+best_weights_saved_path = './saved_weights/' + model_name + '_' + dataset_name + '_sgd_ndn_best_new'
+param_saved_path = './saved_models/' + model_name + '_' + dataset_name + '_sgd_ndn_new'
 
 if not os.path.exists(weights_saved_path):
     os.makedirs(weights_saved_path)
@@ -36,7 +36,7 @@ if not os.path.exists(best_weights_saved_path):
 if not os.path.exists(param_saved_path):
     os.makedirs(param_saved_path)
 
-N_CLASSES = 10
+N_CLASSES = 100
 t0 = time.time()
 no_epochs = 200
 
@@ -69,7 +69,7 @@ def model_saver(md, path, is_best=False):
 
 
 # download and create datasets
-train_dataset = datasets.CIFAR10(root=dataset_name + '_data',
+train_dataset = datasets.CIFAR100(root=dataset_name + '_data',
                                   train=True,
                                   transform=transforms.Compose([
                                       transforms.RandomHorizontalFlip(),
@@ -78,7 +78,7 @@ train_dataset = datasets.CIFAR10(root=dataset_name + '_data',
                                   ]),
                                   download=True)
 
-valid_dataset = datasets.CIFAR10(root=dataset_name + '_data',
+valid_dataset = datasets.CIFAR100(root=dataset_name + '_data',
                                   train=False,
                                   transform=transforms.Compose([
                                       transforms.ToTensor(),
