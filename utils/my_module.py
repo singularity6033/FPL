@@ -1,5 +1,6 @@
 import torch
 import torch.nn as nn
+import torch.nn.functional as F
 import utils.my_functional as mf
 from utils.basic import linear_backward_error, pool_backward_error
 import os
@@ -242,6 +243,7 @@ class CNN(nn.Module):
             nn.ReLU(inplace=True),
             # nn.Dropout(),
             nn.Linear(512, num_classes),
+            # nn.Softmax(dim=1)
         )
         if init_weights:
             self._initialize_weights()

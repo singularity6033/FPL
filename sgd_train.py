@@ -14,20 +14,20 @@ import utils.my_module as mm
 import os
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+DEVICE = 'cuda:3' if torch.cuda.is_available() else 'cpu'
 mm.DEVICE = DEVICE
 print(DEVICE)
 
 BATCH_SIZE = 1
-learning_rate = 0.001
-weight_decay = 1e-6
+learning_rate = 0.0005
+weight_decay = 5e-4
 momentum = 0.9
 lr_drop = 20
 model_name = 'vgg11'  # vgg11 or vgg16
-dataset_name = 'cifar100'  # cifar10 or cifar100
-weights_saved_path = './saved_weights/' + model_name + '_' + dataset_name + '_sgd_ndn_new'
-best_weights_saved_path = './saved_weights/' + model_name + '_' + dataset_name + '_sgd_ndn_best_new'
-param_saved_path = './saved_models/' + model_name + '_' + dataset_name + '_sgd_ndn_new'
+dataset_name = 'cifar10'  # cifar10 or cifar100
+weights_saved_path = './saved_weights/' + model_name + '_' + dataset_name + '_sgd_ndn_new_normal_1'
+best_weights_saved_path = './saved_weights/' + model_name + '_' + dataset_name + '_sgd_ndn_best_new_normal_1'
+param_saved_path = './saved_models/' + model_name + '_' + dataset_name + '_sgd_ndn_new_normal_1'
 
 if not os.path.exists(weights_saved_path):
     os.makedirs(weights_saved_path)
@@ -36,7 +36,7 @@ if not os.path.exists(best_weights_saved_path):
 if not os.path.exists(param_saved_path):
     os.makedirs(param_saved_path)
 
-N_CLASSES = 100
+N_CLASSES = 10
 t0 = time.time()
 no_epochs = 200
 
@@ -62,26 +62,29 @@ def model_saver(md, path, is_best=False):
                 print("Error: %s : %s" % (f, e.strerror))
     ii = 0
     for name, parameters in md.named_parameters():
-        print(name)
+        # print(name)
         if name in saved_layers:
             torch.save(parameters, path + '/' + model_name + '_' + dataset_name + '_' + str(ii) + "_sgd_ndn.pt")
             ii += 1
 
 
 # download and create datasets
-train_dataset = datasets.CIFAR100(root=dataset_name + '_data',
+train_dataset = datasets.CIFAR10(root=dataset_name + '_data',
                                   train=True,
                                   transform=transforms.Compose([
                                       transforms.RandomHorizontalFlip(),
                                       transforms.RandomCrop(32, 4),
+                                      # transforms.RandomRotation(30),
                                       transforms.ToTensor(),
+                                      transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                                   ]),
                                   download=True)
 
-valid_dataset = datasets.CIFAR100(root=dataset_name + '_data',
+valid_dataset = datasets.CIFAR10(root=dataset_name + '_data',
                                   train=False,
                                   transform=transforms.Compose([
                                       transforms.ToTensor(),
+                                      transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
                                   ]))
 
 # define the data loaders
@@ -94,12 +97,12 @@ val_loader = DataLoader(dataset=valid_dataset,
                         shuffle=False)
 
 model = CNN(model_name=model_name, num_classes=N_CLASSES, batch_norm=False, init_weights=True).to(DEVICE)
-optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
-scheduler = lr_scheduler.StepLR(optimizer, step_size=100, gamma=0.5)
-# scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[100, 200], gamma=0.5)  # learning rate decay
-# lambda_x = lambda epoch: 0.5 ** (epoch // lr_drop)
-# scheduler = LambdaLR(optimizer, lr_lambda=lambda_x)
-print(model)
+optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
+# scheduler = lr_scheduler.StepLR(optimizer, step_size=25, gamma=0.5)
+# scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[20, 30, 40, 60, 80, 100, 120, 140, 160, 180, 200], gamma=0.2)  # learning rate decay
+lambda_x = lambda epoch: 0.2 ** (epoch // lr_drop)
+scheduler = LambdaLR(optimizer, lr_lambda=lambda_x)
+# print(model)
 loss = nn.CrossEntropyLoss().to(DEVICE)
 
 train_loss_all = []
