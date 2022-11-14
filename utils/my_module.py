@@ -274,7 +274,7 @@ class CNN(nn.Module):
                 layers += [conv2d]
                 if self.batch_norm:
                     layers += [nn.BatchNorm2d(layer)]
-                layers += [nn.ReLU(True)]
+                layers += [nn.ReLU(inplace=True)]
                 in_channels = layer
         return nn.Sequential(*layers)
 

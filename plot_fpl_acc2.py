@@ -23,7 +23,7 @@ file_path = './saved_models'
 for i in range(2):
     plt.figure(i)
     plt.title(titles[i], fontproperties=font_name)
-    plt.xlabel("Validation Accuracy (%)", fontproperties=font_name)
+    plt.xlabel("Testing Accuracy (%)", fontproperties=font_name)
     max_acc = [0.0] * 10
     for j in range(10):
         p = os.path.sep.join([file_path, names[i] + '_fpl', '_' + str(j + 1) + '.txt'])
@@ -41,7 +41,7 @@ for i in range(2):
     for rect in rects:
         plt.text(rect.get_width(), rect.get_y() + rect.get_height() / 2.,
                  f'{rect.get_width():.2f}' + '%', ha='left', va='center', fontsize='medium')
-    plt.savefig(saved_path[i])
+    plt.savefig(saved_path[i], dpi=300)
 
 labels_2 = ['subnet-1', 'subnet-2', 'subnet-3', 'subnet-4', 'subnet-5', 'subnet-6', 'subnet-7', 'subnet-8', 'subnet-9',
             'subnet-10', 'subnet-11', 'subnet-12', 'subnet-13', 'subnet-14', 'full net']
@@ -51,7 +51,7 @@ colors_2 = ['#3158dd', '#3c62dc', '#466cdc', '#5176db', '#5c80da', '#668ad9', '#
 for i in range(2, 4):
     plt.figure(i)
     plt.title(titles[i], fontproperties=font_name)
-    plt.xlabel("Validation Accuracy (%)", fontproperties=font_name)
+    plt.xlabel("Testing Accuracy (%)", fontproperties=font_name)
     max_acc = [0.0] * 15
     for j in range(15):
         p = os.path.sep.join([file_path, names[i] + '_fpl', '_' + str(j + 1) + '.txt'])
@@ -69,4 +69,4 @@ for i in range(2, 4):
     for rect in rects:
         plt.text(rect.get_width(), rect.get_y() + rect.get_height() / 2.,
                  f'{rect.get_width():.2f}' + '%', ha='left', va='center', fontsize='medium')
-        plt.savefig(saved_path[i])
+        plt.savefig(saved_path[i], dpi=300)

@@ -14,20 +14,22 @@ import utils.my_module as mm
 import os
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
-DEVICE = 'cuda:3' if torch.cuda.is_available() else 'cpu'
+DEVICE = 'cuda:1' if torch.cuda.is_available() else 'cpu'
 mm.DEVICE = DEVICE
 print(DEVICE)
 
+# bn settings: 128, 0.1, 5e-4, 0.9, 40, no initial weights, have bias (in my_module)
+# no bn, vgg11-0.001, vgg16-0.0005
 BATCH_SIZE = 1
 learning_rate = 0.0005
 weight_decay = 5e-4
 momentum = 0.9
 lr_drop = 20
-model_name = 'vgg11'  # vgg11 or vgg16
-dataset_name = 'cifar10'  # cifar10 or cifar100
-weights_saved_path = './saved_weights/' + model_name + '_' + dataset_name + '_sgd_ndn_new_normal_1'
-best_weights_saved_path = './saved_weights/' + model_name + '_' + dataset_name + '_sgd_ndn_best_new_normal_1'
-param_saved_path = './saved_models/' + model_name + '_' + dataset_name + '_sgd_ndn_new_normal_1'
+model_name = 'vgg16'  # vgg11 or vgg16
+dataset_name = 'cifar100'  # cifar10 or cifar100
+weights_saved_path = './saved_weights/' + model_name + '_' + dataset_name + '_sgd_ndn_new_normal_2_1'
+best_weights_saved_path = './saved_weights/' + model_name + '_' + dataset_name + '_sgd_ndn_new_normal_2_1'
+param_saved_path = './saved_models/' + model_name + '_' + dataset_name + '_sgd_ndn_new_normal_2_1'
 
 if not os.path.exists(weights_saved_path):
     os.makedirs(weights_saved_path)
@@ -36,7 +38,7 @@ if not os.path.exists(best_weights_saved_path):
 if not os.path.exists(param_saved_path):
     os.makedirs(param_saved_path)
 
-N_CLASSES = 10
+N_CLASSES = 100
 t0 = time.time()
 no_epochs = 200
 
@@ -67,24 +69,46 @@ def model_saver(md, path, is_best=False):
             torch.save(parameters, path + '/' + model_name + '_' + dataset_name + '_' + str(ii) + "_sgd_ndn.pt")
             ii += 1
 
+# used for bn
+# mean = {
+#     'cifar10': (0.4914, 0.4822, 0.4465),
+#     'cifar100': (0.5071, 0.4867, 0.4408),
+# }
+#
+# std = {
+#     'cifar10': (0.2023, 0.1994, 0.2010),
+#     'cifar100': (0.2675, 0.2565, 0.2761),
+# }
+
+
+# used for no bn
+mean = {
+    'cifar10': (0.485, 0.456, 0.406),
+    'cifar100': (0.485, 0.456, 0.406),
+}
+
+std = {
+    'cifar10': (0.229, 0.224, 0.225),
+    'cifar100': (0.229, 0.224, 0.225),
+}
 
 # download and create datasets
-train_dataset = datasets.CIFAR10(root=dataset_name + '_data',
+train_dataset = datasets.CIFAR100(root=dataset_name + '_data',
                                   train=True,
                                   transform=transforms.Compose([
                                       transforms.RandomHorizontalFlip(),
                                       transforms.RandomCrop(32, 4),
                                       # transforms.RandomRotation(30),
                                       transforms.ToTensor(),
-                                      transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                                      transforms.Normalize(mean=mean[dataset_name], std=std[dataset_name]),
                                   ]),
                                   download=True)
 
-valid_dataset = datasets.CIFAR10(root=dataset_name + '_data',
+valid_dataset = datasets.CIFAR100(root=dataset_name + '_data',
                                   train=False,
                                   transform=transforms.Compose([
                                       transforms.ToTensor(),
-                                      transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                                      transforms.Normalize(mean=mean[dataset_name], std=std[dataset_name]),
                                   ]))
 
 # define the data loaders
@@ -98,8 +122,8 @@ val_loader = DataLoader(dataset=valid_dataset,
 
 model = CNN(model_name=model_name, num_classes=N_CLASSES, batch_norm=False, init_weights=True).to(DEVICE)
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate, momentum=momentum, weight_decay=weight_decay)
+# scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[60, 120, 160], gamma=0.2)  # learning rate decay
 # scheduler = lr_scheduler.StepLR(optimizer, step_size=25, gamma=0.5)
-# scheduler = lr_scheduler.MultiStepLR(optimizer, milestones=[20, 30, 40, 60, 80, 100, 120, 140, 160, 180, 200], gamma=0.2)  # learning rate decay
 lambda_x = lambda epoch: 0.2 ** (epoch // lr_drop)
 scheduler = LambdaLR(optimizer, lr_lambda=lambda_x)
 # print(model)
@@ -177,14 +201,14 @@ with open(filename_loss, 'a') as out:
 
 plt.figure(figsize=(12, 4))
 plt.subplot(1, 2, 1)
-plt.plot(range(no_epochs), train_loss_all, "ro-", label="Train loss")
-plt.plot(range(no_epochs), test_loss_all, "bs-", label="test loss")
+plt.plot(range(no_epochs), train_loss_all, label="Train loss")
+plt.plot(range(no_epochs), test_loss_all, label="test loss")
 plt.legend()
 plt.xlabel("no_epochs")
 plt.ylabel("Loss")
 plt.subplot(1, 2, 2)
-plt.plot(range(no_epochs), train_acc_all, "ro-", label="Train accuracy")
-plt.plot(range(no_epochs), test_acc_all, "bs-", label="test accuracy")
+plt.plot(range(no_epochs), train_acc_all, label="Train accuracy")
+plt.plot(range(no_epochs), test_acc_all, label="test accuracy")
 plt.xlabel("no_epochs")
 plt.ylabel("accuracy")
 plt.legend()

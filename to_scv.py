@@ -1,18 +1,18 @@
 import os
 
-p0 = os.path.sep.join(['saved_models', 'vgg11_cifar100_sgd_ndn_new_normal', 'vgg11train_loss.txt'])
+p0 = os.path.sep.join(['saved_models', 'vgg11_cifar100_sgd_ndn_new_bn', 'vgg11train_loss.txt'])
 f0 = open(p0)
 train_loss = list(map(float, f0.readline().lstrip('[').rstrip(']\n').split(', ')))
 
-p1 = os.path.sep.join(['saved_models', 'vgg11_cifar100_sgd_ndn_new_normal', 'vgg11_loss.txt'])
+p1 = os.path.sep.join(['saved_models', 'vgg11_cifar100_sgd_ndn_new_bn', 'vgg11_loss.txt'])
 f1 = open(p1)
 test_loss = list(map(float, f1.readline().lstrip('[').rstrip(']\n').split(', ')))
 
-p2 = os.path.sep.join(['saved_models', 'vgg11_cifar100_sgd_ndn_new_normal', 'vgg11_acc.txt'])
+p2 = os.path.sep.join(['saved_models', 'vgg11_cifar100_sgd_ndn_new_bn', 'vgg11_acc.txt'])
 f2 = open(p2)
 test_acc = list(map(float, f2.readline().lstrip('[').rstrip(']\n').split(', ')))
 
-p3 = os.path.sep.join(['saved_models', 'vgg11_cifar100_sgd_ndn_new_normal', 'vgg11train_acc.txt'])
+p3 = os.path.sep.join(['saved_models', 'vgg11_cifar100_sgd_ndn_new_bn', 'vgg11train_acc.txt'])
 f3 = open(p3)
 train_acc = list(map(float, f3.readline().lstrip('[').rstrip(']\n').split(', ')))
 
@@ -52,7 +52,7 @@ def Save_to_Csv(data, file_name, Save_format='csv', Save_type='col'):
     if Save_format == 'csv':
         Pd_data.to_csv('./' + file_name + '.csv', encoding='utf-8')
     else:
-        Pd_data.to_excel('./' + file_name + '.xls', encoding='utf-8')
+        Pd_data.to_excel('./' + file_name + '.xlsx', encoding='utf-8')
 
 
-Save_to_Csv(data=Data, file_name='vgg11_cifar100', Save_format='csv', Save_type='row')
+Save_to_Csv(data=Data, file_name='vgg11_cifar100_bn', Save_format=' ', Save_type='row')
